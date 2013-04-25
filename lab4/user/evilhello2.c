@@ -10,6 +10,7 @@ struct Segdesc *gdt;
 struct Segdesc *entry;
 char va[PGSIZE];
 
+
 // Call this function with ring0 privilege
 void evil()
 {

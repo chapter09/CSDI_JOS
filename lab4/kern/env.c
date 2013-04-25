@@ -132,14 +132,6 @@ env_init(void)
 		envs[i].env_link = env_free_list;
 		env_free_list = &envs[i];
 	}
-	/*envs[0].env_status = ENV_FREE;
-	envs[0].env_id = 0;
-
-	for(i = 1; i < NENV; i ++){
-		envs[i].env_status = ENV_FREE;
-		envs[i].env_id = 0;
-		envs[i - 1].env_link = &envs[i];
-	}*/
 
 	env_init_percpu();
 }
@@ -271,6 +263,7 @@ env_alloc(struct Env **newenv_store, envid_t parent_id)
 
 	// Enable interrupts while in user mode.
 	// LAB 4: Your code here.
+	e->env_tf.tf_eflags |= FL_IF;
 
 	// Clear the page fault handler until user installs one.
 	e->env_pgfault_upcall = 0;
@@ -399,7 +392,7 @@ load_icode(struct Env *e, uint8_t *binary, size_t size)
 	// Now map one page for the program's initial stack
 	// at virtual address USTACKTOP - PGSIZE.
 	// LAB 3: Your code here.
-	region_alloc(e, (void *) (USTACKTOP - PGSIZE), PGSIZE);
+	region_alloc(e, (void *)(USTACKTOP - PGSIZE), PGSIZE);
 }
 
 //
@@ -559,7 +552,7 @@ env_run(struct Env *e)
 		curenv->env_runs += 1;
 		lcr3(PADDR(curenv->env_pgdir));
 	}
-	cprintf("FLAG\n");
+	unlock_kernel();
 	env_pop_tf(&(curenv->env_tf));
 }
 
